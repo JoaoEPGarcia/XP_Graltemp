@@ -102,21 +102,45 @@
     });
   }
 
-  // Injeta <style> após todos os CSS do tema — ganha na cascade
+  // Força fundo vermelho e layout de 1 linha na barra inicial
   function fixBarraInicial() {
-    if (document.getElementById('xp-barra-fix')) return;
-    var s = document.createElement('style');
-    s.id = 'xp-barra-fix';
-    s.textContent = [
-      '.barra-inicial{background-color:#ff0000!important;background-image:none!important;}',
-      '@media(max-width:767px){',
-      '  .barra-inicial .top-actions{display:flex!important;flex-wrap:nowrap!important;justify-content:space-around!important;align-items:center!important;width:100%!important;padding:2px 0!important;}',
-      '  .barra-inicial .top-actions .top-action-item{flex:1!important;text-align:center!important;padding:0 1px!important;white-space:nowrap!important;overflow:hidden!important;}',
-      '  .barra-inicial .top-actions .top-action-item a{font-size:10px!important;white-space:nowrap!important;color:#ffffff!important;display:inline!important;}',
-      '  .barra-inicial .top-actions .top-action-item i{font-size:10px!important;}',
-      '}'
-    ].join('');
-    document.head.appendChild(s);
+    var barra = document.querySelector('.barra-inicial');
+    if (!barra) return;
+
+    // Fundo vermelho em qualquer tela
+    barra.style.setProperty('background-color', '#ff0000', 'important');
+    barra.style.setProperty('background-image', 'none', 'important');
+
+    // Layout mobile: 3 itens em 1 linha
+    if (window.innerWidth >= 768) return;
+
+    var actions = barra.querySelector('.top-actions');
+    if (!actions) return;
+
+    actions.style.setProperty('display', 'flex', 'important');
+    actions.style.setProperty('flex-direction', 'row', 'important');
+    actions.style.setProperty('flex-wrap', 'nowrap', 'important');
+    actions.style.setProperty('justify-content', 'space-around', 'important');
+    actions.style.setProperty('align-items', 'center', 'important');
+    actions.style.setProperty('width', '100%', 'important');
+
+    var items = actions.querySelectorAll('.top-action-item');
+    items.forEach(function (item) {
+      item.style.setProperty('flex', '1', 'important');
+      item.style.setProperty('white-space', 'nowrap', 'important');
+      item.style.setProperty('text-align', 'center', 'important');
+      item.style.setProperty('padding', '0', 'important');
+
+      // Reduz apenas os links de texto (não containers)
+      item.querySelectorAll('a').forEach(function (a) {
+        a.style.setProperty('font-size', '10px', 'important');
+        a.style.setProperty('white-space', 'nowrap', 'important');
+        a.style.setProperty('color', '#ffffff', 'important');
+      });
+      item.querySelectorAll('i').forEach(function (i) {
+        i.style.setProperty('font-size', '10px', 'important');
+      });
+    });
   }
 
   // 1ª injeção: logo que o DOM estiver pronto
