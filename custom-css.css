@@ -116,15 +116,27 @@ body { background: #e3d8c3 !important; }
     padding-bottom: 10px !important;
     border: 1px solid #eee;
   }
+  /* FIX: overflow visible para não cortar botões que ultrapassem height fixo do card */
+  #listagemProdutos ul.listagem-linha li,
+  #listagemProdutos ul li {
+    overflow: visible !important;
+  }
+  #listagemProdutos ul.listagem-linha li .listagem-item,
+  .listagem.aproveite-tambem .listagem-item,
+  #listagemProdutos ul li .listagem-item {
+    overflow: visible !important;
+    position: relative !important;
+  }
   .listagem-item .acoes-produto {
     display: flex !important;
     justify-content: space-between !important;
     padding: 0 10px !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    /* FIX: garante que acoes-produto fique acima de qualquer overlay */
+    /* FIX: stacking context próprio bem acima de qualquer overlay */
     position: relative !important;
-    z-index: 10 !important;
+    z-index: 999 !important;
+    isolation: isolate !important;
   }
   .listagem-item .acoes-produto a,
   .listagem-item .acoes-produto .botao-comprar,
@@ -144,9 +156,9 @@ body { background: #e3d8c3 !important; }
     height: 40px !important;
     line-height: 40px !important;
     text-align: center !important;
-    /* FIX: garante área de clique e z-index acima do overlay da imagem */
+    /* FIX: garante área de clique acima de qualquer overlay */
     position: relative !important;
-    z-index: 10 !important;
+    z-index: 999 !important;
     cursor: pointer !important;
     pointer-events: auto !important;
   }
@@ -173,11 +185,12 @@ body { background: #e3d8c3 !important; }
     display: block;
     line-height: 40px;
   }
-  /* FIX: mantém o overlay da imagem do produto abaixo dos botões de ação */
-  .listagem-item .imagem-produto,
-  .listagem-item .imagem-produto a,
-  .listagem-item > a.img {
-    position: relative !important;
+  /* FIX: overlay da imagem do produto fica abaixo dos botões de ação.
+     NÃO alteramos position para não quebrar o layout absoluto do tema. */
+  .listagem-item > a.img,
+  .listagem-item > a.foto,
+  .listagem-item > a.link-produto,
+  .listagem-item .imagem-produto a {
     z-index: 1 !important;
   }
   /* Tipografia dos produtos */
