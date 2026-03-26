@@ -102,17 +102,36 @@
     });
   }
 
+  // Força barra inicial vermelha em qualquer tamanho de tela
+  function fixBarraInicial() {
+    var barra = document.querySelector('.barra-inicial');
+    if (!barra) return;
+    barra.style.setProperty('display', 'block', 'important');
+    barra.style.setProperty('background', '#ff0000', 'important');
+    barra.style.setProperty('background-color', '#ff0000', 'important');
+    barra.style.setProperty('background-image', 'none', 'important');
+    // Texto e ícones brancos
+    var filhos = barra.querySelectorAll('*');
+    for (var i = 0; i < filhos.length; i++) {
+      filhos[i].style.setProperty('color', '#ffffff', 'important');
+    }
+  }
+
   // 1ª injeção: logo que o DOM estiver pronto
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', injetarBotoes);
+    document.addEventListener('DOMContentLoaded', function () {
+      injetarBotoes();
+      fixBarraInicial();
+    });
   } else {
     injetarBotoes();
+    fixBarraInicial();
   }
 
   // 2ª injeção: após o tema JS carregar (~500ms e 1500ms)
   window.addEventListener('load', function () {
-    setTimeout(injetarBotoes, 500);
-    setTimeout(injetarBotoes, 1500);
+    setTimeout(function () { injetarBotoes(); fixBarraInicial(); }, 500);
+    setTimeout(function () { injetarBotoes(); fixBarraInicial(); }, 1500);
   });
 
 })();
