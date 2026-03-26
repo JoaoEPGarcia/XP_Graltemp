@@ -50,8 +50,10 @@ body { background: #e3d8c3 !important; }
 2. BARRA INICIAL — TODOS OS TAMANHOS DE TELA
 ================================================================= */
 .barra-inicial {
+  display: block !important;
   background: #ff0000 !important;
   background-image: none !important;
+  background-color: #ff0000 !important;
 }
 .barra-inicial .row-fluid { border: none !important; }
 .barra-inicial,
