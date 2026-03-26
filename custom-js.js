@@ -50,17 +50,43 @@
         'min-height:50px'
       ].join('!important;') + '!important';
 
+      var btnBaseStyle = [
+        'display:block',
+        'width:48%',
+        'height:40px',
+        'line-height:40px',
+        'text-align:center',
+        'border-radius:4px',
+        'border:none',
+        'background-image:none',
+        'color:#ffffff',
+        'font-size:14px',
+        'font-weight:bold',
+        'cursor:pointer',
+        'position:relative',
+        'z-index:999',
+        'pointer-events:auto',
+        'text-decoration:none',
+        'box-sizing:border-box'
+      ].join('!important;') + '!important';
+
       // Botão CARRINHO
       var btnComprar = document.createElement('a');
       btnComprar.className = 'botao-comprar';
       btnComprar.setAttribute('href', cartUrl);
       btnComprar.setAttribute('title', 'Adicionar ao carrinho');
+      btnComprar.textContent = 'CARRINHO';
+      btnComprar.style.cssText = btnBaseStyle;
+      btnComprar.style.setProperty('background-color', '#28a745', 'important');
 
       // Botão VER MAIS
       var btnVerMais = document.createElement('a');
       btnVerMais.className = 'ver-mais botao-ver-mais';
       btnVerMais.setAttribute('href', prodUrl);
       btnVerMais.setAttribute('title', 'Ver detalhes do produto');
+      btnVerMais.textContent = 'VER MAIS';
+      btnVerMais.style.cssText = btnBaseStyle;
+      btnVerMais.style.setProperty('background-color', '#0056b3', 'important');
 
       acoes.appendChild(btnComprar);
       acoes.appendChild(btnVerMais);
