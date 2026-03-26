@@ -185,12 +185,9 @@ body { background: #e3d8c3 !important; }
     display: block;
     line-height: 40px;
   }
-  /* FIX: overlay da imagem do produto fica abaixo dos botões de ação.
+  /* FIX: overlay .produto-sobrepor (cobre 100% do card) fica abaixo dos botões.
      NÃO alteramos position para não quebrar o layout absoluto do tema. */
-  .listagem-item > a.img,
-  .listagem-item > a.foto,
-  .listagem-item > a.link-produto,
-  .listagem-item .imagem-produto a {
+  .listagem-item a.produto-sobrepor {
     z-index: 1 !important;
   }
   /* Tipografia dos produtos */
