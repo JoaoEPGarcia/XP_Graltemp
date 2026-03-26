@@ -30,6 +30,25 @@
       // Cria container
       var acoes = document.createElement('div');
       acoes.className = 'acoes-produto';
+      // Inline styles sobrepõem qualquer regra CSS do tema (maior especificidade)
+      acoes.style.cssText = [
+        'display:flex',
+        'opacity:1',
+        'visibility:visible',
+        'transform:none',
+        '-webkit-transform:none',
+        'position:relative',
+        'top:auto',
+        'bottom:auto',
+        'left:auto',
+        'right:auto',
+        'z-index:999',
+        'justify-content:space-between',
+        'padding:0 10px',
+        'width:100%',
+        'box-sizing:border-box',
+        'min-height:50px'
+      ].join('!important;') + '!important';
 
       // Botão CARRINHO
       var btnComprar = document.createElement('a');
