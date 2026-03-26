@@ -1,0 +1,262 @@
+/* =================================================================
+   XERIFE PIMENTA — CSS BASE V6
+   ATENÇÃO: As regras mobile críticas (botões, barra, frete)
+   estão no arquivo custom-styles.js que deve ser colado em
+   Aparência > JavaScript Personalizado.
+   Este arquivo vai em Aparência > CSS Personalizado.
+================================================================= */
+/* =================================================================
+1. REGRAS GERAIS
+================================================================= */
+body { background: #e3d8c3 !important; }
+#cabecalho .logo {
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
+}
+#cabecalho .logo img {
+  max-height: 130px !important;
+  width: auto !important;
+}
+/* Ocultar títulos de destaques */
+.listagem .titulo-categoria,
+.vitrine-destaque .titulo,
+.componente .titulo,
+.bandeira-destaque,
+.selo-destaque,
+.produto-destaque { display: none !important; }
+/* Ocultar favoritos e marcas */
+.btn-add-favorito i,
+.wishlist-icon,
+.adic-favo,
+.favoritar-produto,
+#corpo .conteiner > .marcas { display: none !important; }
+/* Todos os selos: vermelho + texto branco */
+.bandeiras-produto .bandeira,
+.bandeiras-produto span[class^="bandeira-"] {
+  background-color: #ff0000 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+/* Frete Grátis: verde fluorescente + texto preto
+   (reforçado também pelo JS para cobrir sobrescrita do tema) */
+.bandeiras-produto .bandeira-frete-gratis,
+.bandeiras-produto .bandeira.bandeira-frete-gratis,
+.bandeiras-produto span.bandeira-frete-gratis {
+  background-color: #39FF14 !important;
+  color: #000000 !important;
+  border: none !important;
+}
+/* =================================================================
+2. DESKTOP (min-width: 768px)
+================================================================= */
+@media only screen and (min-width: 768px) {
+  /* Barra inicial */
+  .barra-inicial {
+    background: #ff0000 !important;
+    background-image: none !important;
+  }
+  .barra-inicial .row-fluid { border: none !important; }
+  .barra-inicial, .barra-inicial * {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+  }
+  .barra-inicial .top-actions .top-action-item:nth-child(2) { display: none !important; }
+  /* Cabeçalho */
+  #cabecalho:not(.fixed) .row-fluid { flex-wrap: nowrap !important; }
+  #cabecalho:not(.fixed) .span3 { width: 30%; }
+  #cabecalho:not(.fixed) .span3 a { max-height: initial !important; }
+  #cabecalho .actions > li > a .icon {
+    width: 40px !important;
+    height: 40px !important;
+    background: url(https://cdn.awsli.com.br/328/328830/arquivos/ICONE-CONTA.png) no-repeat center center;
+    background-size: 100% auto;
+  }
+  #cabecalho .actions > li > a .icon .a { fill: transparent !important; }
+  /* Busca */
+  .conteudo-topo.span9 .busca { max-width: 400px; }
+  /* Menu */
+  .full.menu .nivel-um {
+    display: flex;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: initial !important;
+  }
+  .full.menu .nivel-um > li {
+    width: auto !important;
+    padding: 0 10px !important;
+    display: flex;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+  }
+  .full.menu .nivel-um > li > a,
+  .full.menu .nivel-um > li > a > strong { line-height: 1 !important; }
+  .full.menu .nivel-um > li.categoria-id-2745167,
+  .full.menu .nivel-dois li:hover { background: #ff0000 !important; }
+  .full.menu .nivel-dois li:hover > a { color: #ffffff !important; }
+  .full.menu .nivel-um > li > a > .titulo::before {
+    content: "";
+    width: 26px;
+    height: 28px;
+    background: url(https://cdn.awsli.com.br/328/328830/arquivos/estrela-menu.png) no-repeat center center;
+    background-size: auto 100%;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 5px 0 0;
+  }
+  /* Cards de produto */
+  #listagemProdutos ul.listagem-linha li .listagem-item,
+  .listagem.aproveite-tambem .listagem-item,
+  #listagemProdutos ul li .listagem-item {
+    height: 520px !important;
+    min-height: 520px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding-bottom: 10px !important;
+    border: 1px solid #eee;
+  }
+  .listagem-item .acoes-produto {
+    display: flex !important;
+    justify-content: space-between !important;
+    padding: 0 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    /* FIX: garante que acoes-produto fique acima de qualquer overlay */
+    position: relative !important;
+    z-index: 10 !important;
+  }
+  .listagem-item .acoes-produto a,
+  .listagem-item .acoes-produto .botao-comprar,
+  .listagem-item .acoes-produto .botao-ver-mais {
+    border: none !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+    width: 48% !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: bold !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    /* FIX: display block para que width/height funcionem (padrão <a> é inline) */
+    display: block !important;
+    /* FIX: altura explícita pois font-size está em 0 */
+    height: 40px !important;
+    line-height: 40px !important;
+    text-align: center !important;
+    /* FIX: garante área de clique e z-index acima do overlay da imagem */
+    position: relative !important;
+    z-index: 10 !important;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+  }
+  .listagem-item .acoes-produto .botao-comprar {
+    background-color: #28a745 !important;
+    font-size: 0 !important;
+  }
+  .listagem-item .acoes-produto .botao-comprar::after {
+    content: "CARRINHO";
+    font-size: 14px !important;
+    display: block;
+    line-height: 40px;
+  }
+  .listagem-item .acoes-produto .botao-comprar i { display: none !important; }
+  .listagem-item .acoes-produto .ver-mais,
+  .listagem-item .acoes-produto .botao-ver-mais {
+    background-color: #0056b3 !important;
+    font-size: 0 !important;
+  }
+  .listagem-item .acoes-produto .ver-mais::after,
+  .listagem-item .acoes-produto .botao-ver-mais::after {
+    content: "VER MAIS";
+    font-size: 14px !important;
+    display: block;
+    line-height: 40px;
+  }
+  /* FIX: mantém o overlay da imagem do produto abaixo dos botões de ação */
+  .listagem-item .imagem-produto,
+  .listagem-item .imagem-produto a,
+  .listagem-item > a.img {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  /* Tipografia dos produtos */
+  #listagemProdutos.listagem .listagem-item .info-produto .nome-produto,
+  .listagem.aproveite-tambem .listagem-item .info-produto .nome-produto {
+    font-size: 15pt !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+  }
+  .listagem-item .info-produto {
+    text-align: center !important;
+    font-family: 'Oswald', sans-serif;
+  }
+  .principal .preco-parcela *,
+  .listagem-item .info-produto .preco-parcela * { font-family: 'Oswald', sans-serif; }
+  .principal .preco-parcela strong,
+  .listagem-item .info-produto .preco-parcela strong {
+    color: #E90004 !important;
+    font-size: 15pt !important;
+    font-weight: 600 !important;
+  }
+  .principal .preco-promocional,
+  .listagem-item .info-produto .preco-promocional {
+    font-weight: 400 !important;
+    font-size: 24pt !important;
+    color: #333 !important;
+    line-height: 1;
+    font-family: 'Oswald', sans-serif;
+  }
+  .principal .desconto-a-vista,
+  .listagem-item .info-produto .desconto-a-vista {
+    font-size: 12pt !important;
+    line-height: 2;
+  }
+  .principal .desconto-a-vista strong,
+  .listagem-item .info-produto .desconto-a-vista strong {
+    color: #333 !important;
+    font-weight: 500 !important;
+  }
+  /* Newsletter */
+  #barraNewsletter {
+    background: url(https://cdn.awsli.com.br/328/328830/arquivos/41205194_224028301798959_7256944371600195584_n.png) repeat-x center bottom !important;
+    background-size: auto 60px !important;
+    padding-bottom: 80px;
+  }
+  #barraNewsletter.posicao-rodape .componente .newsletter-assinar {
+    background: #ff0000 !important;
+    border: 1px solid #E2E2E2 !important;
+  }
+  /* WhatsApp flutuante */
+  .central-chats {
+    position: fixed; bottom: 120px; right: 35px; z-index: 999;
+  }
+  .central-chats > .inside {
+    position: absolute; bottom: 0; right: 0;
+    width: 60px; height: 60px;
+    transition: all .2s ease-in;
+    border-radius: 100%;
+  }
+  .central-chats:hover > .inside {
+    width: 250px; height: 60px;
+    border-radius: 100px 100px 45px 100px;
+  }
+  .central-chats:hover .inside .icone-principal::after {
+    content: " (19) 97120-7472";
+    font-size: 14pt;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+  }
+  .central-chats > .inside .icone-principal {
+    width: 100%; line-height: 60px;
+    text-align: left; padding-left: 15px; font-size: 30pt;
+    background: #fc0007; color: #fff; border-radius: 100px;
+  }
+  /* Box flutuante produto */
+  .acoes-flutuante, #barra-acoes-produto {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
