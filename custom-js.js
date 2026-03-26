@@ -102,19 +102,12 @@
     });
   }
 
-  // Força barra inicial vermelha em qualquer tamanho de tela
+  // Força fundo vermelho na barra inicial (sem alterar display nem filhos)
   function fixBarraInicial() {
     var barra = document.querySelector('.barra-inicial');
     if (!barra) return;
-    barra.style.setProperty('display', 'block', 'important');
-    barra.style.setProperty('background', '#ff0000', 'important');
     barra.style.setProperty('background-color', '#ff0000', 'important');
     barra.style.setProperty('background-image', 'none', 'important');
-    // Texto e ícones brancos
-    var filhos = barra.querySelectorAll('*');
-    for (var i = 0; i < filhos.length; i++) {
-      filhos[i].style.setProperty('color', '#ffffff', 'important');
-    }
   }
 
   // 1ª injeção: logo que o DOM estiver pronto
