@@ -133,6 +133,9 @@ body { background: #e3d8c3 !important; }
     padding: 0 10px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    /* FIX: sempre visível — o tema esconde com opacity/visibility no hover */
+    opacity: 1 !important;
+    visibility: visible !important;
     /* FIX: stacking context próprio bem acima de qualquer overlay */
     position: relative !important;
     z-index: 999 !important;
