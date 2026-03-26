@@ -129,18 +129,12 @@
         item.style.setProperty('padding', '0 2px', 'important');
         item.style.setProperty('white-space', 'nowrap', 'important');
 
-        var textos = item.querySelectorAll('a, span, strong, p');
-        textos.forEach(function (el) {
+        // Aplica em todos os filhos
+        var filhos = item.querySelectorAll('*');
+        filhos.forEach(function (el) {
           el.style.setProperty('font-size', '10px', 'important');
           el.style.setProperty('white-space', 'nowrap', 'important');
           el.style.setProperty('color', '#ffffff', 'important');
-        });
-
-        var icones = item.querySelectorAll('i, svg');
-        icones.forEach(function (el) {
-          el.style.setProperty('font-size', '11px', 'important');
-          el.style.setProperty('width', '11px', 'important');
-          el.style.setProperty('height', '11px', 'important');
         });
       });
     }
