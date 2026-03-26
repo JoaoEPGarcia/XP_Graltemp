@@ -128,16 +128,26 @@ body { background: #e3d8c3 !important; }
     position: relative !important;
   }
   .listagem-item .acoes-produto {
+    /* Sempre visível — override completo do efeito hover-only do tema */
     display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    /* Reseta transform (translateY) que o tema usa para empurrar os botões para fora */
+    transform: none !important;
+    -webkit-transform: none !important;
+    /* Reseta qualquer posicionamento absoluto que tire os botões da área visível */
+    position: relative !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    /* Layout */
     justify-content: space-between !important;
     padding: 0 10px !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    /* FIX: sempre visível — o tema esconde com opacity/visibility no hover */
-    opacity: 1 !important;
-    visibility: visible !important;
-    /* FIX: stacking context próprio bem acima de qualquer overlay */
-    position: relative !important;
+    min-height: 50px !important;
+    /* Z-index acima do overlay .produto-sobrepor */
     z-index: 999 !important;
     isolation: isolate !important;
   }
