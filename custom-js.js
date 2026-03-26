@@ -27,48 +27,56 @@
         ? '/carrinho/add/?produto_id=' + prodId + '&quantidade=1'
         : prodUrl;
 
+      // Aplica propriedades com !important via setProperty
+      // (style.cssText ignora !important — único modo correto é setProperty)
+      function applyStyles(el, props) {
+        Object.keys(props).forEach(function (prop) {
+          el.style.setProperty(prop, props[prop], 'important');
+        });
+      }
+
       // Cria container
       var acoes = document.createElement('div');
       acoes.className = 'acoes-produto';
-      // Inline styles sobrepõem qualquer regra CSS do tema (maior especificidade)
-      acoes.style.cssText = [
-        'display:flex',
-        'opacity:1',
-        'visibility:visible',
-        'transform:none',
-        '-webkit-transform:none',
-        'position:relative',
-        'top:auto',
-        'bottom:auto',
-        'left:auto',
-        'right:auto',
-        'z-index:999',
-        'justify-content:space-between',
-        'padding:0 10px',
-        'width:100%',
-        'box-sizing:border-box',
-        'min-height:50px'
-      ].join('!important;') + '!important';
+      applyStyles(acoes, {
+        'display': 'flex',
+        'opacity': '1',
+        'visibility': 'visible',
+        'transform': 'none',
+        '-webkit-transform': 'none',
+        'position': 'relative',
+        'top': 'auto',
+        'bottom': 'auto',
+        'left': 'auto',
+        'right': 'auto',
+        'z-index': '999',
+        'justify-content': 'space-between',
+        'padding': '0 10px',
+        'width': '100%',
+        'box-sizing': 'border-box',
+        'min-height': '50px'
+      });
 
-      var btnBaseStyle = [
-        'display:block',
-        'width:48%',
-        'height:40px',
-        'line-height:40px',
-        'text-align:center',
-        'border-radius:4px',
-        'border:none',
-        'background-image:none',
-        'color:#ffffff',
-        'font-size:14px',
-        'font-weight:bold',
-        'cursor:pointer',
-        'position:relative',
-        'z-index:999',
-        'pointer-events:auto',
-        'text-decoration:none',
-        'box-sizing:border-box'
-      ].join('!important;') + '!important';
+      var btnBaseProps = {
+        'display': 'block',
+        'width': '48%',
+        'height': '40px',
+        'line-height': '40px',
+        'text-align': 'center',
+        'border-radius': '4px',
+        'border': 'none',
+        'background-image': 'none',
+        'color': '#ffffff',
+        'font-size': '14px',
+        'font-weight': 'bold',
+        'cursor': 'pointer',
+        'position': 'relative',
+        'z-index': '999',
+        'pointer-events': 'auto',
+        'text-decoration': 'none',
+        'box-sizing': 'border-box',
+        'overflow': 'visible'
+      };
 
       // Botão CARRINHO
       var btnComprar = document.createElement('a');
@@ -76,7 +84,7 @@
       btnComprar.setAttribute('href', cartUrl);
       btnComprar.setAttribute('title', 'Adicionar ao carrinho');
       btnComprar.textContent = 'CARRINHO';
-      btnComprar.style.cssText = btnBaseStyle;
+      applyStyles(btnComprar, btnBaseProps);
       btnComprar.style.setProperty('background-color', '#28a745', 'important');
 
       // Botão VER MAIS
@@ -85,7 +93,7 @@
       btnVerMais.setAttribute('href', prodUrl);
       btnVerMais.setAttribute('title', 'Ver detalhes do produto');
       btnVerMais.textContent = 'VER MAIS';
-      btnVerMais.style.cssText = btnBaseStyle;
+      applyStyles(btnVerMais, btnBaseProps);
       btnVerMais.style.setProperty('background-color', '#0056b3', 'important');
 
       acoes.appendChild(btnComprar);
