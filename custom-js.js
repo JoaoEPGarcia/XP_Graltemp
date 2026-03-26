@@ -102,12 +102,48 @@
     });
   }
 
-  // Força fundo vermelho na barra inicial (sem alterar display nem filhos)
+  // Força fundo vermelho e 3 itens em 1 linha na barra inicial
   function fixBarraInicial() {
     var barra = document.querySelector('.barra-inicial');
     if (!barra) return;
+
     barra.style.setProperty('background-color', '#ff0000', 'important');
     barra.style.setProperty('background-image', 'none', 'important');
+
+    // Só ajusta layout no mobile
+    if (window.innerWidth >= 768) return;
+
+    var actions = barra.querySelector('.top-actions');
+    if (actions) {
+      actions.style.setProperty('display', 'flex', 'important');
+      actions.style.setProperty('flex-wrap', 'nowrap', 'important');
+      actions.style.setProperty('justify-content', 'space-around', 'important');
+      actions.style.setProperty('align-items', 'center', 'important');
+      actions.style.setProperty('width', '100%', 'important');
+      actions.style.setProperty('padding', '0', 'important');
+
+      var items = actions.querySelectorAll('.top-action-item');
+      items.forEach(function (item) {
+        item.style.setProperty('flex', '1', 'important');
+        item.style.setProperty('text-align', 'center', 'important');
+        item.style.setProperty('padding', '0 2px', 'important');
+        item.style.setProperty('white-space', 'nowrap', 'important');
+
+        var textos = item.querySelectorAll('a, span, strong, p');
+        textos.forEach(function (el) {
+          el.style.setProperty('font-size', '10px', 'important');
+          el.style.setProperty('white-space', 'nowrap', 'important');
+          el.style.setProperty('color', '#ffffff', 'important');
+        });
+
+        var icones = item.querySelectorAll('i, svg');
+        icones.forEach(function (el) {
+          el.style.setProperty('font-size', '11px', 'important');
+          el.style.setProperty('width', '11px', 'important');
+          el.style.setProperty('height', '11px', 'important');
+        });
+      });
+    }
   }
 
   // 1ª injeção: logo que o DOM estiver pronto
