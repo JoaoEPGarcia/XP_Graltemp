@@ -47,7 +47,21 @@ body { background: #e3d8c3 !important; }
   border: none !important;
 }
 /* =================================================================
-2. BOTÕES DE AÇÃO — TODOS OS TAMANHOS DE TELA
+2. BARRA INICIAL — TODOS OS TAMANHOS DE TELA
+================================================================= */
+.barra-inicial {
+  background: #ff0000 !important;
+  background-image: none !important;
+}
+.barra-inicial .row-fluid { border: none !important; }
+.barra-inicial,
+.barra-inicial * {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+/* =================================================================
+3. BOTÕES DE AÇÃO — TODOS OS TAMANHOS DE TELA
 ================================================================= */
 /* Garante que o container dos botões seja sempre visível */
 .listagem-item .acoes-produto {
@@ -99,19 +113,9 @@ body { background: #e3d8c3 !important; }
 }
 
 /* =================================================================
-3. DESKTOP (min-width: 768px)
+4. DESKTOP (min-width: 768px)
 ================================================================= */
 @media only screen and (min-width: 768px) {
-  /* Barra inicial */
-  .barra-inicial {
-    background: #ff0000 !important;
-    background-image: none !important;
-  }
-  .barra-inicial .row-fluid { border: none !important; }
-  .barra-inicial, .barra-inicial * {
-    color: #ffffff !important;
-    fill: #ffffff !important;
-  }
   .barra-inicial .top-actions .top-action-item:nth-child(2) { display: none !important; }
   /* Cabeçalho */
   #cabecalho:not(.fixed) .row-fluid { flex-wrap: nowrap !important; }
