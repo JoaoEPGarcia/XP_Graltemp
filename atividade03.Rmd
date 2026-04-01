@@ -197,7 +197,9 @@ A) Apresente estatísticas sumárias e gráficos adequados.
 
 ```{r}
 dados_ex3 <- un_member_states_2024 %>%
-  select(country, life_expectancy, fertility_rate) %>%
+  select(country, life_expectancy_2022, fertility_rate_2022) %>%
+  rename(life_expectancy = life_expectancy_2022,
+         fertility_rate  = fertility_rate_2022) %>%
   drop_na()
 
 resumo <- dados_ex3 %>%
