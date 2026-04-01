@@ -219,7 +219,7 @@ cat("Cov(beta0, beta1) =", round(cov_beta,   4), "\n")
 
 D) Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresente o p-valor para o teste bilateral. Descreva e interprete o resultado em termos do problema.
 
-```{r, echo=TRUE}
+```{r}
 t_stat  <- beta1_hat / se_beta1
 p_valor <- 2 * pt(abs(t_stat), df = n - 2, lower.tail = FALSE)
 
@@ -231,7 +231,7 @@ A estatística do teste é $t =$ `r round(t_stat, 2)` com $p$-valor $\approx$ `r
 
 E) Calcule, usando o R, um intervalo de confiança de 95\% para $\beta_1$. Descreva e interprete o resultado em termos do problema.
 
-```{r, echo=TRUE}
+```{r}
 t_crit       <- qt(0.975, df = n - 2)
 ic_beta1_inf <- beta1_hat - t_crit * se_beta1
 ic_beta1_sup <- beta1_hat + t_crit * se_beta1
@@ -243,7 +243,7 @@ Com 95% de confiança, cada ponto percentual adicional de desvantagem econômica
 
 F) Apresente os resultados usando as funções `lm`, `vcov` e `confint`.
 
-```{r, echo=TRUE}
+```{r}
 modelo <- lm(average_sat_math ~ perc_disadvan, data = MA_schools)
 resumo_lm_pt(modelo)
 vcov_pt(modelo)
@@ -331,7 +331,7 @@ O diagrama revela uma associação negativa: países com maior expectativa de vi
 
 B) Ajuste um modelo de regressão linear simples adequado para o problema.
 
-```{r, echo=TRUE}
+```{r}
 modelo3 <- lm(fertility_rate ~ life_expectancy, data = dados_ex3)
 resumo_lm_pt(modelo3)
 ```
@@ -348,7 +348,7 @@ O modelo estimado é $\widehat{\text{fertilidade}} = `r round(beta0_3, 3)` + `r 
 
 C) Apresente um intervalo de confiança para $\beta_1$ de 95\%.
 
-```{r, echo=TRUE}
+```{r}
 confint_pt(modelo3, par = "life_expectancy", level = 0.95)
 ```
 
@@ -360,7 +360,7 @@ Com 95% de confiança, cada ano adicional de expectativa de vida está associado
 
 D) Apresente um intervalo de confiança de 95\% para a taxa de fertilidade média entre países em que a expectativa de vida é de 70 anos.
 
-```{r, echo=TRUE}
+```{r}
 novo <- data.frame(life_expectancy = 70)
 predict_pt(modelo3, newdata = novo, interval = "confidence", level = 0.95)
 ```
@@ -374,7 +374,7 @@ Para países com expectativa de vida de 70 anos, estima-se que a taxa de fertili
 
 E) Apresente um intervalo de predição de 95\% para a taxa de fertilidade de um país em que a expectativa de vida é de 70 anos.
 
-```{r, echo=TRUE}
+```{r}
 predict_pt(modelo3, newdata = novo, interval = "prediction", level = 0.95)
 ```
 
@@ -391,7 +391,7 @@ Para um país específico com expectativa de vida de 70 anos, o intervalo de pre
 
 A) Divisão treino/validação e ajuste do modelo.
 
-```{r, echo=TRUE}
+```{r}
 set.seed(42)
 n_total    <- nrow(MA_schools)
 idx_treino <- sample(seq_len(n_total), size = floor(2/3 * n_total))
@@ -405,7 +405,7 @@ resumo_lm_pt(modelo_treino)
 
 B) Predições no subconjunto validação e comparação de RMSE.
 
-```{r, echo=TRUE}
+```{r}
 pred_val    <- predict(modelo_treino, newdata = validacao)
 res_val     <- validacao$average_sat_math - pred_val
 RMSE_val    <- sqrt(mean(res_val^2))
