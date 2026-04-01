@@ -14,6 +14,73 @@ output:
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo=FALSE)
 ```
 
+```{r funcoes-pt, include=FALSE}
+# Imprime resumo do modelo lm em português
+resumo_lm_pt <- function(modelo) {
+  s <- summary(modelo)
+  coefs <- coef(s)
+  cat("Chamada:\n")
+  cat(paste(deparse(formula(modelo)), collapse = ""), "\n\n")
+  res <- residuals(modelo)
+  q <- quantile(res, c(0, 0.25, 0.5, 0.75, 1))
+  cat("Resíduos:\n")
+  cat(sprintf("  Mínimo      1ºQ   Mediana      3ºQ    Máximo\n"))
+  cat(sprintf("%8.3f  %8.3f  %8.3f  %8.3f  %8.3f\n\n", q[1], q[2], q[3], q[4], q[5]))
+  cat("Coeficientes:\n")
+  cat(sprintf("%-20s %11s %11s %9s %12s\n",
+              "", "Estimativa", "Erro Pad.", "valor t", "Pr(>|t|)"))
+  for (i in seq_len(nrow(coefs))) {
+    p <- coefs[i, 4]
+    sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**",
+           ifelse(p < 0.05, "*", ifelse(p < 0.1, ".", " "))))
+    cat(sprintf("%-20s %11.4f %11.4f %9.4f %12.2e %s\n",
+                rownames(coefs)[i], coefs[i,1], coefs[i,2], coefs[i,3], p, sig))
+  }
+  cat("---\nCód. signif.: 0 '***' 0,001 '**' 0,01 '*' 0,05 '.' 0,1 ' ' 1\n\n")
+  cat(sprintf("Erro padrão residual: %.4f com %d graus de liberdade\n",
+              s$sigma, s$df[2]))
+  cat(sprintf("R-quadrado: %.4f   R-quadrado ajustado: %.4f\n",
+              s$r.squared, s$adj.r.squared))
+  f <- s$fstatistic
+  pf_val <- pf(f[1], f[2], f[3], lower.tail = FALSE)
+  cat(sprintf("Estatística F: %.2f com %d e %d GL   p-valor: %.2e\n",
+              f[1], f[2], f[3], pf_val))
+}
+
+# Imprime matriz de covariância em português
+vcov_pt <- function(modelo) {
+  v <- vcov(modelo)
+  rn <- rownames(v)
+  rn[rn == "(Intercept)"] <- "(Intercepto)"
+  rownames(v) <- colnames(v) <- rn
+  cat("Matriz de covariância estimada dos coeficientes:\n")
+  print(round(v, 6))
+}
+
+# Imprime confint em português
+confint_pt <- function(modelo, parm = NULL, level = 0.95) {
+  ci <- if (is.null(parm)) confint(modelo, level = level) else confint(modelo, parm = parm, level = level)
+  pct_inf <- paste0(round((1 - level) / 2 * 100, 1), "%")
+  pct_sup <- paste0(round((1 - (1 - level) / 2) * 100, 1), "%")
+  colnames(ci) <- c(paste0("Limite inf. (", pct_inf, ")"),
+                    paste0("Limite sup. (", pct_sup, ")"))
+  rn <- rownames(ci)
+  rn[rn == "(Intercept)"] <- "(Intercepto)"
+  rownames(ci) <- rn
+  cat(sprintf("Intervalo de confiança de %.0f%%:\n", level * 100))
+  print(round(ci, 4))
+}
+
+# Imprime predict com intervalo em português
+predict_pt <- function(modelo, newdata, interval = "confidence", level = 0.95) {
+  p <- predict(modelo, newdata = newdata, interval = interval, level = level)
+  tipo <- if (interval == "confidence") "confiança" else "predição"
+  colnames(p) <- c("Ajuste", "Limite inferior", "Limite superior")
+  cat(sprintf("Intervalo de %s de %.0f%%:\n", tipo, level * 100))
+  print(round(p, 4))
+}
+```
+
 **Exercício 1** Leia o enunciado do [Exercício 1.6 do Weisberg](https://ebookcentral.proquest.com/lib/unicamp-ebooks/reader.action?docID=7103845&ppg=41). O conjunto de dados tem nome `Rateprof` e está disponível no pacote `alr4`.
 
 ```{r, message=FALSE}
@@ -108,13 +175,13 @@ Sxy <- sum((x - x_bar) * (y - y_bar))
 beta1_hat <- Sxy / Sxx
 beta0_hat <- y_bar - beta1_hat * x_bar
 
-cat("x_bar =", round(x_bar, 4), "\n")
-cat("y_bar =", round(y_bar, 4), "\n")
-cat("Sxx   =", round(Sxx, 4),   "\n")
-cat("Syy   =", round(Syy, 4),   "\n")
-cat("Sxy   =", round(Sxy, 4),   "\n")
-cat("beta1 =", round(beta1_hat, 4), "\n")
-cat("beta0 =", round(beta0_hat, 4), "\n")
+cat("x_barra =", round(x_bar, 4), "\n")
+cat("y_barra =", round(y_bar, 4), "\n")
+cat("Sxx     =", round(Sxx, 4),   "\n")
+cat("Syy     =", round(Syy, 4),   "\n")
+cat("Sxy     =", round(Sxy, 4),   "\n")
+cat("beta1   =", round(beta1_hat, 4), "\n")
+cat("beta0   =", round(beta0_hat, 4), "\n")
 ```
 
 ```{r}
@@ -143,10 +210,10 @@ se_beta0 <- sqrt(sigma2_hat * (1/n + x_bar^2 / Sxx))
 
 cov_beta <- -x_bar * sigma2_hat / Sxx
 
-cat("sigma^2 estimado  =", round(sigma2_hat, 4), "\n")
-cat("EP(beta0)         =", round(se_beta0,   4), "\n")
-cat("EP(beta1)         =", round(se_beta1,   4), "\n")
-cat("Cov(beta0, beta1) =", round(cov_beta,   4), "\n")
+cat("sigma^2 estimado     =", round(sigma2_hat, 4), "\n")
+cat("EP(beta0)            =", round(se_beta0,   4), "\n")
+cat("EP(beta1)            =", round(se_beta1,   4), "\n")
+cat("Cov(beta0, beta1)    =", round(cov_beta,   4), "\n")
 ```
 
 D) Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresente o p-valor para o teste bilateral. Descreva e interprete o resultado em termos do problema.
@@ -156,7 +223,7 @@ t_stat  <- beta1_hat / se_beta1
 p_valor <- 2 * pt(abs(t_stat), df = n - 2, lower.tail = FALSE)
 
 cat("Estatística t =", round(t_stat, 4), "\n")
-cat("p-valor       =", format(p_valor, scientific = TRUE), "\n")
+cat("p-valor       =", format(p_valor, scientific = TRUE, decimal.mark = ","), "\n")
 ```
 
 A estatística do teste é $t =$ `r round(t_stat, 2)` com $p$-valor $\approx$ `r format(p_valor, scientific = TRUE, digits = 3)`. Como o $p$-valor é muito menor que 0,05, rejeitamos $H_0: \beta_1 = 0$. Há evidência estatística forte de que o percentual de alunos desfavorecidos está associado negativamente com a média no SAT de matemática.
@@ -169,6 +236,7 @@ ic_beta1_inf <- beta1_hat - t_crit * se_beta1
 ic_beta1_sup <- beta1_hat + t_crit * se_beta1
 
 cat("IC 95% para beta1: [", round(ic_beta1_inf, 4), ",", round(ic_beta1_sup, 4), "]\n")
+
 ```
 
 Com 95% de confiança, cada ponto percentual adicional de desvantagem econômica está associado a uma redução entre `r round(abs(ic_beta1_sup), 2)` e `r round(abs(ic_beta1_inf), 2)` pontos na média do SAT de matemática. O intervalo não contém zero, confirmando a significância de $\beta_1$.
@@ -177,9 +245,9 @@ F) Apresente os resultados usando as funções `lm`, `vcov` e `confint`.
 
 ```{r, echo=TRUE}
 modelo <- lm(average_sat_math ~ perc_disadvan, data = MA_schools)
-summary(modelo)
-vcov(modelo)
-confint(modelo, level = 0.95)
+resumo_lm_pt(modelo)
+vcov_pt(modelo)
+confint_pt(modelo, level = 0.95)
 ```
 
 \newpage
@@ -266,7 +334,7 @@ B) Ajuste um modelo de regressão linear simples adequado para o problema.
 
 ```{r, echo=TRUE}
 modelo3 <- lm(fertility_rate ~ life_expectancy, data = dados_ex3)
-summary(modelo3)
+resumo_lm_pt(modelo3)
 ```
 
 ```{r}
@@ -282,7 +350,7 @@ O modelo estimado é $\widehat{\text{fertilidade}} = `r round(beta0_3, 3)` + `r 
 C) Apresente um intervalo de confiança para $\beta_1$ de 95\%.
 
 ```{r, echo=TRUE}
-confint(modelo3, "life_expectancy", level = 0.95)
+confint_pt(modelo3, parm = "life_expectancy", level = 0.95)
 ```
 
 ```{r}
@@ -295,7 +363,7 @@ D) Apresente um intervalo de confiança de 95\% para a taxa de fertilidade médi
 
 ```{r, echo=TRUE}
 novo <- data.frame(life_expectancy = 70)
-predict(modelo3, newdata = novo, interval = "confidence", level = 0.95)
+predict_pt(modelo3, newdata = novo, interval = "confidence", level = 0.95)
 ```
 
 ```{r}
@@ -307,7 +375,7 @@ Para países com expectativa de vida de 70 anos, estima-se que a taxa de fertili
 E) Apresente um intervalo de predição de 95\% para a taxa de fertilidade de um país em que a expectativa de vida é de 70 anos.
 
 ```{r, echo=TRUE}
-predict(modelo3, newdata = novo, interval = "prediction", level = 0.95)
+predict_pt(modelo3, newdata = novo, interval = "prediction", level = 0.95)
 ```
 
 ```{r}
@@ -331,7 +399,7 @@ treino    <- MA_schools[ idx_treino, ]
 validacao <- MA_schools[-idx_treino, ]
 
 modelo_treino <- lm(average_sat_math ~ perc_disadvan, data = treino)
-summary(modelo_treino)
+resumo_lm_pt(modelo_treino)
 ```
 
 B) Predições no subconjunto validação e comparação de RMSE.
