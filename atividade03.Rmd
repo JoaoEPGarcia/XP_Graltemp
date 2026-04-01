@@ -1,0 +1,355 @@
+---
+title: "Atividade 03"
+author:
+  - Aluno 1 RA
+  - Aluno 2 RA
+  - Aluno 3 RA
+output:
+ bookdown::pdf_document2:
+     toc: FALSE
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo=FALSE)
+```
+
+**Exercício 1** Leia o enunciado do [Exercício 1.6 do Weisberg](https://ebookcentral.proquest.com/lib/unicamp-ebooks/reader.action?docID=7103845&ppg=41). O conjunto de dados tem nome `Rateprof` e está disponível no pacote `alr4`.
+
+```{r, message=FALSE}
+library(alr4)
+data("Rateprof")
+```
+
+Apresente abaixo um gráfico similar ao apresentado no enunciado. Comente sobre as relações entre as notas dos cinco quesitos avaliados.
+
+```{r}
+pairs(~ quality + helpfulness + clarity + easiness + raterInterest,
+      data = Rateprof,
+      main = "Scatterplot Matrix — Rateprof")
+```
+
+As variáveis *quality*, *helpfulness* e *clarity* apresentam forte correlação positiva entre si, indicando que professores bem avaliados em clareza tendem também a ser avaliados como prestativos e de boa qualidade. A variável *easiness* mostra correlação positiva moderada com as demais, sugerindo que professores percebidos como mais fáceis tendem a receber melhores avaliações gerais. Já *raterInterest* apresenta correlação mais fraca com os demais quesitos, indicando que o interesse prévio do aluno na disciplina é relativamente independente das avaliações do professor.
+
+\newpage
+
+**Exercício 2** Considere o conjunto de dados `MA_schools` do pacote `moderndive`.  Há interesse em predizer `average_sat_math` a partir da variável `perc_disadvan`.
+
+```{r}
+library(moderndive)
+library(tidyverse)
+library(knitr)
+data(MA_schools)
+```
+
+
+A) Explique o que são as variáveis `average_sat_math` e `perc_disadvan`. Apresente estatísticas sumárias das duas variáveis de interesse, inclua o tamanho amostra. Apresente um diagrama de dispersão e use o mesmo para argumentar sobre uma regressão linear simples nos dados parecer ou não apropriada e qual seria o objetivo do modelo.
+
+A variável `average_sat_math` representa a média das notas de matemática no exame SAT das escolas públicas do estado de Massachusetts (EUA), enquanto `perc_disadvan` indica o percentual de alunos economicamente desfavorecidos em cada escola.
+
+```{r}
+stats_tab <- MA_schools %>%
+  summarise(
+    n        = n(),
+    media    = mean(average_sat_math, na.rm = TRUE),
+    dp       = sd(average_sat_math,   na.rm = TRUE),
+    minimo   = min(average_sat_math,  na.rm = TRUE),
+    maximo   = max(average_sat_math,  na.rm = TRUE)
+  ) %>%
+  bind_rows(
+    MA_schools %>%
+      summarise(
+        n      = n(),
+        media  = mean(perc_disadvan, na.rm = TRUE),
+        dp     = sd(perc_disadvan,   na.rm = TRUE),
+        minimo = min(perc_disadvan,  na.rm = TRUE),
+        maximo = max(perc_disadvan,  na.rm = TRUE)
+      )
+  ) %>%
+  mutate(Variável = c("Média da nota SAT de matemática",
+                      "% de alunos economicamente desfavorecidos")) %>%
+  select(Variável, n, media, dp, minimo, maximo)
+
+kable(stats_tab,
+      digits  = 1,
+      col.names = c("Variável", "n", "Média", "DP", "Mínimo", "Máximo"),
+      caption = "Estatísticas sumárias das variáveis de interesse")
+```
+
+```{r}
+ggplot(MA_schools, aes(x = perc_disadvan, y = average_sat_math)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  labs(
+    x       = "Percentual de alunos economicamente desfavorecidos (%)",
+    y       = "Média da nota SAT de matemática",
+    title   = "Desempenho no SAT de matemática vs. desvantagem econômica",
+    caption = "Dados: MA_schools (moderndive). Linha: ajuste linear com IC 95%."
+  ) +
+  theme_minimal()
+```
+
+O diagrama de dispersão revela uma associação negativa clara entre as duas variáveis: escolas com maior proporção de alunos desfavorecidos tendem a apresentar médias menores no SAT de matemática. A relação parece aproximadamente linear, o que torna a regressão linear simples uma abordagem razoável. O objetivo do modelo é estimar e quantificar o efeito do percentual de desvantagem econômica sobre o desempenho médio em matemática, permitindo predizer a nota esperada dado o contexto socioeconômico da escola.
+
+B) Calcule, usando o R, os valores de $\bar{x}$, $\bar{y}$, $S_{XX}$, $S_{YY}$, $S_{XY}$. Calcule as estimativas para $\beta_0$ e $\beta_1$ da regressão linear de $Y$ em $X$ usando os valores calculados. Apresente novamente o gráfico de dispersão, mas agora incluindo a reta ajustada.
+
+```{r, echo=TRUE}
+x <- MA_schools$perc_disadvan
+y <- MA_schools$average_sat_math
+n <- length(x)
+
+x_bar <- mean(x)
+y_bar <- mean(y)
+
+Sxx <- sum((x - x_bar)^2)
+Syy <- sum((y - y_bar)^2)
+Sxy <- sum((x - x_bar) * (y - y_bar))
+
+beta1_hat <- Sxy / Sxx
+beta0_hat <- y_bar - beta1_hat * x_bar
+
+cat("x_bar =", round(x_bar, 4), "\n")
+cat("y_bar =", round(y_bar, 4), "\n")
+cat("Sxx   =", round(Sxx, 4),   "\n")
+cat("Syy   =", round(Syy, 4),   "\n")
+cat("Sxy   =", round(Sxy, 4),   "\n")
+cat("beta1 =", round(beta1_hat, 4), "\n")
+cat("beta0 =", round(beta0_hat, 4), "\n")
+```
+
+```{r}
+ggplot(MA_schools, aes(x = perc_disadvan, y = average_sat_math)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(intercept = beta0_hat, slope = beta1_hat,
+              color = "steelblue", linewidth = 1) +
+  labs(
+    x     = "Percentual de alunos economicamente desfavorecidos (%)",
+    y     = "Média da nota SAT de matemática",
+    title = "Reta ajustada manualmente"
+  ) +
+  theme_minimal()
+```
+
+C) Calcule, usando o R, uma estimativa para $\sigma^2$ e encontre os erros padrões de $\hat{\beta}_0$ e $\hat{\beta}_1$. Calcule $\widehat{Cov}(\hat{\beta}_0,\hat{\beta}_1)$.
+
+```{r, echo=TRUE}
+y_hat    <- beta0_hat + beta1_hat * x
+residuos <- y - y_hat
+
+sigma2_hat <- sum(residuos^2) / (n - 2)
+
+se_beta1 <- sqrt(sigma2_hat / Sxx)
+se_beta0 <- sqrt(sigma2_hat * (1/n + x_bar^2 / Sxx))
+
+cov_beta <- -x_bar * sigma2_hat / Sxx
+
+cat("sigma^2 estimado  =", round(sigma2_hat, 4), "\n")
+cat("EP(beta0)         =", round(se_beta0,   4), "\n")
+cat("EP(beta1)         =", round(se_beta1,   4), "\n")
+cat("Cov(beta0, beta1) =", round(cov_beta,   4), "\n")
+```
+
+D) Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresente o p-valor para o teste bilateral. Descreva e interprete o resultado em termos do problema.
+
+```{r, echo=TRUE}
+t_stat  <- beta1_hat / se_beta1
+p_valor <- 2 * pt(abs(t_stat), df = n - 2, lower.tail = FALSE)
+
+cat("Estatística t =", round(t_stat, 4), "\n")
+cat("p-valor       =", format(p_valor, scientific = TRUE), "\n")
+```
+
+A estatística do teste é $t =$ `r round(t_stat, 2)` com $p$-valor $\approx$ `r format(p_valor, scientific = TRUE, digits = 3)`. Como o $p$-valor é muito menor que 0,05, rejeitamos $H_0: \beta_1 = 0$. Há evidência estatística forte de que o percentual de alunos desfavorecidos está associado negativamente com a média no SAT de matemática.
+
+E) Calcule, usando o R, um intervalo de confiança de 95\% para $\beta_1$. Descreva e interprete o resultado em termos do problema.
+
+```{r, echo=TRUE}
+t_crit <- qt(0.975, df = n - 2)
+ic_beta1_inf <- beta1_hat - t_crit * se_beta1
+ic_beta1_sup <- beta1_hat + t_crit * se_beta1
+
+cat("IC 95% para beta1: [", round(ic_beta1_inf, 4), ",", round(ic_beta1_sup, 4), "]\n")
+```
+
+Com 95% de confiança, cada ponto percentual adicional de desvantagem econômica está associado a uma redução entre `r round(abs(ic_beta1_sup), 2)` e `r round(abs(ic_beta1_inf), 2)` pontos na média do SAT de matemática. O intervalo não contém zero, confirmando a significância de $\beta_1$.
+
+F) Apresente os resultados usando as funções `lm`, `vcov` e `confint`.
+
+```{r, echo=TRUE}
+modelo <- lm(average_sat_math ~ perc_disadvan, data = MA_schools)
+summary(modelo)
+vcov(modelo)
+confint(modelo, level = 0.95)
+```
+
+\newpage
+
+**Exercício 3** Alguns países exibem altas taxas de fertilidade, enquanto outros apresentam baixas taxas. Existe uma associação entre a taxa de fertilidade e a expectativa de vida? Utilize o conjunto de dados `un_member_states_2024` do pacote `moderndive` para avaliar esta possível associação.
+
+```{r}
+library(moderndive)
+library(tidyverse)
+library(knitr)
+data(un_member_states_2024)
+```
+
+A) Apresente estatísticas sumárias e gráficos adequados.
+
+```{r}
+dados_ex3 <- un_member_states_2024 %>%
+  select(country, life_expectancy, fertility_rate) %>%
+  drop_na()
+
+resumo <- dados_ex3 %>%
+  summarise(
+    n_life = n(),
+    media_life = mean(life_expectancy),
+    dp_life    = sd(life_expectancy),
+    min_life   = min(life_expectancy),
+    max_life   = max(life_expectancy),
+    n_fert     = n(),
+    media_fert = mean(fertility_rate),
+    dp_fert    = sd(fertility_rate),
+    min_fert   = min(fertility_rate),
+    max_fert   = max(fertility_rate)
+  )
+
+tab_resumo <- tibble(
+  Variável = c("Expectativa de vida (anos)", "Taxa de fertilidade (filhos/mulher)"),
+  n        = c(resumo$n_life, resumo$n_fert),
+  Média    = c(resumo$media_life, resumo$media_fert),
+  DP       = c(resumo$dp_life, resumo$dp_fert),
+  Mínimo   = c(resumo$min_life, resumo$min_fert),
+  Máximo   = c(resumo$max_life, resumo$max_fert)
+)
+
+kable(tab_resumo, digits = 2,
+      caption = "Estatísticas sumárias — Exercício 3")
+```
+
+As estatísticas sumárias mostram ampla variação em ambas as variáveis, sugerindo que os países são heterogêneos. Antes de modelar, verificamos a distribuição individual de cada variável e a relação entre elas.
+
+```{r}
+p1 <- ggplot(dados_ex3, aes(x = life_expectancy)) +
+  geom_histogram(bins = 20, fill = "steelblue", color = "white") +
+  labs(x = "Expectativa de vida (anos)", y = "Frequência",
+       title = "Distribuição da expectativa de vida") +
+  theme_minimal()
+
+p2 <- ggplot(dados_ex3, aes(x = fertility_rate)) +
+  geom_histogram(bins = 20, fill = "coral", color = "white") +
+  labs(x = "Taxa de fertilidade", y = "Frequência",
+       title = "Distribuição da taxa de fertilidade") +
+  theme_minimal()
+
+p1
+p2
+```
+
+A taxa de fertilidade apresenta assimetria à direita, enquanto a expectativa de vida tem distribuição mais próxima da simétrica. O diagrama de dispersão a seguir é fundamental para decidir a forma do modelo.
+
+```{r}
+ggplot(dados_ex3, aes(x = life_expectancy, y = fertility_rate)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  labs(x = "Expectativa de vida (anos)",
+       y = "Taxa de fertilidade (filhos/mulher)",
+       title = "Taxa de fertilidade vs. Expectativa de vida") +
+  theme_minimal()
+```
+
+O diagrama revela uma associação negativa: países com maior expectativa de vida tendem a ter menor taxa de fertilidade. A relação apresenta certa curvatura, mas um modelo linear é uma primeira aproximação razoável. O objetivo é quantificar essa associação e predizer a taxa de fertilidade dado o nível de expectativa de vida.
+
+B) Ajuste um modelo de regressão linear simples adequado para o problema.
+
+```{r, echo=TRUE}
+modelo3 <- lm(fertility_rate ~ life_expectancy, data = dados_ex3)
+summary(modelo3)
+```
+
+```{r}
+s3 <- summary(modelo3)
+beta0_3 <- coef(modelo3)[1]
+beta1_3 <- coef(modelo3)[2]
+r2_3    <- s3$r.squared
+sigma2_3 <- s3$sigma^2
+```
+
+O modelo estimado é $\widehat{\text{fertilidade}} = `r round(beta0_3, 3)` + `r round(beta1_3, 3)` \times \text{expectativa de vida}$. O coeficiente $\hat{\beta}_1 = `r round(beta1_3, 3)`$ indica que, em média, cada ano adicional na expectativa de vida está associado a uma redução de `r round(abs(beta1_3), 3)` filhos por mulher. O coeficiente de determinação é $R^2 = `r round(r2_3, 3)`$, ou seja, aproximadamente `r round(r2_3 * 100, 1)`\% da variação na taxa de fertilidade é explicada pela expectativa de vida. A estimativa da variância do erro é $\hat{\sigma}^2 = `r round(sigma2_3, 4)`$.
+
+C) Apresente um intervalo de confiança para $\beta_1$ de 95\%.
+
+```{r, echo=TRUE}
+confint(modelo3, "life_expectancy", level = 0.95)
+```
+
+```{r}
+ic3 <- confint(modelo3, "life_expectancy", level = 0.95)
+```
+
+Com 95% de confiança, cada ano adicional de expectativa de vida está associado a uma redução entre `r round(abs(ic3[2]), 4)` e `r round(abs(ic3[1]), 4)` filhos por mulher. O intervalo não contém zero, confirmando que a associação é estatisticamente significativa.
+
+D) Apresente um intervalo de confiança de 95\% para a taxa de fertilidade média entre países em que a expectativa de vida é de 70 anos.
+
+```{r, echo=TRUE}
+novo <- data.frame(life_expectancy = 70)
+predict(modelo3, newdata = novo, interval = "confidence", level = 0.95)
+```
+
+```{r}
+ic_media_70 <- predict(modelo3, newdata = novo, interval = "confidence", level = 0.95)
+```
+
+Para países com expectativa de vida de 70 anos, estima-se que a taxa de fertilidade média seja `r round(ic_media_70[1], 3)` filhos por mulher, com intervalo de confiança de 95\% de [`r round(ic_media_70[2], 3)`, `r round(ic_media_70[3], 3)`]. Esse intervalo reflete a incerteza sobre o valor médio populacional, sendo mais estreito do que o intervalo de predição.
+
+E) Apresente um intervalo de predição de 95\% para a taxa de fertilidade de um país em que a expectativa de vida é de 70 anos.
+
+```{r, echo=TRUE}
+predict(modelo3, newdata = novo, interval = "prediction", level = 0.95)
+```
+
+```{r}
+ip_70 <- predict(modelo3, newdata = novo, interval = "prediction", level = 0.95)
+```
+
+Para um país específico com expectativa de vida de 70 anos, o intervalo de predição de 95\% é [`r round(ip_70[2], 3)`, `r round(ip_70[3], 3)`] filhos por mulher. Esse intervalo é mais amplo do que o de confiança pois incorpora, além da incerteza sobre a média, a variabilidade natural entre países individuais.
+
+\newpage
+
+**Exercício 4**
+
+A) Divisão treino/validação e ajuste do modelo.
+
+```{r, echo=TRUE}
+set.seed(42)
+n_total <- nrow(MA_schools)
+idx_treino <- sample(seq_len(n_total), size = floor(2/3 * n_total))
+
+treino    <- MA_schools[ idx_treino, ]
+validacao <- MA_schools[-idx_treino, ]
+
+modelo_treino <- lm(average_sat_math ~ perc_disadvan, data = treino)
+summary(modelo_treino)
+```
+
+B) Predições no subconjunto validação e comparação de RMSE.
+
+```{r, echo=TRUE}
+# Predições e RMSE na validação
+pred_val  <- predict(modelo_treino, newdata = validacao)
+res_val   <- validacao$average_sat_math - pred_val
+RMSE_val  <- sqrt(mean(res_val^2))
+
+# RMSE no treino
+res_treino  <- residuals(modelo_treino)
+RMSE_treino <- sqrt(mean(res_treino^2))
+
+cat("RMSE treino    =", round(RMSE_treino, 3), "\n")
+cat("RMSE validação =", round(RMSE_val,    3), "\n")
+```
+
+```{r}
+dif <- round(RMSE_val - RMSE_treino, 3)
+```
+
+O RMSE do subconjunto de validação (`r round(RMSE_val, 3)`) é ligeiramente superior ao do treino (`r round(RMSE_treino, 3)`), com diferença de `r dif` pontos. Essa pequena diferença indica que o modelo não apresenta sobreajuste relevante e generaliza bem para novos dados.
