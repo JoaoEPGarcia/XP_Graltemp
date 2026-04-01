@@ -1,0 +1,27 @@
+---
+title: "Lista de Exercícios 1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo=FALSE)
+```
+
+**Exercício 1** Leia o enunciado do [Exercício 1.6 do Weisberg](https://ebookcentral.proquest.com/lib/unicamp-ebooks/reader.action?docID=7103845&ppg=41). O conjunto de dados tem nome `Rateprof` e está disponível no pacote `alr4`.
+
+```{r, message=FALSE}
+library(alr4)
+data("Rateprof")
+```
+
+Apresente abaixo um gráfico similar ao apresentado no enunciado. Comente sobre as relações entre as notas dos cinco quesitos avaliados.
+
+```{r}
+pairs(~ quality + helpfulness + clarity + easiness + raterInterest,
+      data = Rateprof,
+      main = "Scatterplot Matrix — Rateprof")
+```
+
+**Comentário:**
+
+*Escreva aqui seu comentário sobre as relações entre as variáveis.*
