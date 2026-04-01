@@ -25,3 +25,68 @@ pairs(~ quality + helpfulness + clarity + easiness + raterInterest,
 **Comentário:**
 
 O gráfico de dispersão matricial revela relações positivas entre a maioria dos cinco quesitos avaliados. As variáveis *quality*, *helpfulness* e *clarity* apresentam forte correlação positiva entre si: professores avaliados como claros tendem a ser considerados prestativos e a receber notas gerais mais altas. A variável *easiness* apresenta correlação positiva moderada com *quality*, *helpfulness* e *clarity*, sugerindo que cursos percebidos como mais fáceis tendem a receber avaliações levemente mais favoráveis nos demais quesitos, embora a relação seja menos pronunciada. Já *raterInterest* — o interesse prévio do avaliador na disciplina — mostra correlação positiva moderada com *quality* e *clarity*, indicando que alunos mais interessados no assunto tendem a avaliar melhor o professor, o que pode introduzir um viés de confundimento nas análises. Em resumo, os cinco quesitos são positivamente associados, mas o grau de associação varia: os três primeiros (*quality*, *helpfulness*, *clarity*) formam um grupo de alta correlação interna, enquanto *easiness* e *raterInterest* têm associações mais fracas com os demais.
+
+---
+
+**Exercício 2** Considere o conjunto de dados `MA_schools` do pacote `moderndive`. Há interesse em predizer `average_sat_math` a partir da variável `perc_disadvan`.
+
+```{r}
+library(moderndive)
+library(tidyverse)
+library(knitr)
+data(MA_schools)
+```
+
+**A)** Explique o que são as variáveis `average_sat_math` e `perc_disadvan`. Apresente estatísticas sumárias das duas variáveis de interesse, inclua o tamanho amostral. Apresente um diagrama de dispersão e use o mesmo para argumentar sobre uma regressão linear simples nos dados parecer ou não apropriada e qual seria o objetivo do modelo.
+
+```{r}
+# Estatísticas sumárias
+stats_tab <- MA_schools %>%
+  summarise(
+    n        = n(),
+    media    = mean(average_sat_math, na.rm = TRUE),
+    dp       = sd(average_sat_math,   na.rm = TRUE),
+    minimo   = min(average_sat_math,  na.rm = TRUE),
+    maximo   = max(average_sat_math,  na.rm = TRUE)
+  ) %>%
+  bind_rows(
+    MA_schools %>%
+      summarise(
+        n      = n(),
+        media  = mean(perc_disadvan, na.rm = TRUE),
+        dp     = sd(perc_disadvan,   na.rm = TRUE),
+        minimo = min(perc_disadvan,  na.rm = TRUE),
+        maximo = max(perc_disadvan,  na.rm = TRUE)
+      )
+  ) %>%
+  mutate(Variável = c("Média da nota SAT de matemática",
+                      "% de alunos economicamente desfavorecidos")) %>%
+  select(Variável, n, media, dp, minimo, maximo)
+
+kable(stats_tab,
+      digits  = 1,
+      col.names = c("Variável", "n", "Média", "DP", "Mínimo", "Máximo"),
+      caption = "Estatísticas sumárias das variáveis de interesse")
+```
+
+```{r}
+ggplot(MA_schools, aes(x = perc_disadvan, y = average_sat_math)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
+  labs(
+    x       = "Percentual de alunos economicamente desfavorecidos (%)",
+    y       = "Média da nota SAT de matemática",
+    title   = "Desempenho no SAT de matemática vs. desvantagem econômica",
+    caption = "Dados: MA_schools (moderndive). Linha: ajuste linear com IC 95%."
+  ) +
+  theme_minimal()
+```
+
+**Descrição das variáveis:**
+
+- **Média da nota SAT de matemática** (`average_sat_math`): média das notas obtidas pelos alunos de cada escola no componente de matemática do SAT (Scholastic Assessment Test), exame padronizado utilizado para admissão em universidades norte-americanas. Trata-se da variável resposta de interesse.
+- **Percentual de alunos economicamente desfavorecidos** (`perc_disadvan`): proporção (em %) de estudantes de cada escola classificados como economicamente desfavorecidos, conforme critérios do estado de Massachusetts. É a variável preditora.
+
+**Argumento sobre a regressão linear simples:**
+
+O diagrama de dispersão evidencia uma associação negativa entre as duas variáveis: escolas com maior proporção de alunos economicamente desfavorecidos tendem a apresentar menores médias no SAT de matemática. A relação parece aproximadamente linear ao longo de toda a amplitude de `perc_disadvan`, sem curvatura acentuada ou quebra de tendência, o que torna a regressão linear simples uma abordagem razoável como primeiro modelo. O objetivo do modelo seria quantificar e testar essa associação — isto é, estimar em quantos pontos a média do SAT de matemática diminui, em média, para cada ponto percentual adicional de alunos desfavorecidos —, bem como avaliar o poder preditivo da variável socioeconômica sobre o desempenho acadêmico das escolas.
