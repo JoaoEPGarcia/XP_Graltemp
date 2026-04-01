@@ -11,55 +11,59 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo=FALSE)
-```
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
 
-```{r funcoes-pt, include=FALSE}
-# Imprime resumo do modelo lm em português
+# Desativa pdfcrop (evita erro de Ghostscript em caminhos de rede UNC)
+knitr::knit_hooks$set(crop = NULL)
+
 resumo_lm_pt <- function(modelo) {
-  s <- summary(modelo)
+  s     <- summary(modelo)
   coefs <- coef(s)
   cat("Chamada:\n")
   cat(paste(deparse(formula(modelo)), collapse = ""), "\n\n")
   res <- residuals(modelo)
-  q <- quantile(res, c(0, 0.25, 0.5, 0.75, 1))
-  cat("Resíduos:\n")
-  cat(sprintf("  Mínimo      1ºQ   Mediana      3ºQ    Máximo\n"))
-  cat(sprintf("%8.3f  %8.3f  %8.3f  %8.3f  %8.3f\n\n", q[1], q[2], q[3], q[4], q[5]))
+  q   <- quantile(res, c(0, 0.25, 0.5, 0.75, 1))
+  cat("Residuos:\n")
+  cat(sprintf("  Minimo      1oQ   Mediana      3oQ    Maximo\n"))
+  cat(sprintf("%8.3f  %8.3f  %8.3f  %8.3f  %8.3f\n\n",
+              q[1], q[2], q[3], q[4], q[5]))
   cat("Coeficientes:\n")
   cat(sprintf("%-20s %11s %11s %9s %12s\n",
               "", "Estimativa", "Erro Pad.", "valor t", "Pr(>|t|)"))
   for (i in seq_len(nrow(coefs))) {
-    p <- coefs[i, 4]
-    sig <- ifelse(p < 0.001, "***", ifelse(p < 0.01, "**",
-           ifelse(p < 0.05, "*", ifelse(p < 0.1, ".", " "))))
+    pv  <- coefs[i, 4]
+    sig <- ifelse(pv < 0.001, "***", ifelse(pv < 0.01, "**",
+           ifelse(pv < 0.05,  "*",   ifelse(pv < 0.1,  ".", " "))))
     cat(sprintf("%-20s %11.4f %11.4f %9.4f %12.2e %s\n",
-                rownames(coefs)[i], coefs[i,1], coefs[i,2], coefs[i,3], p, sig))
+                rownames(coefs)[i],
+                coefs[i, 1], coefs[i, 2], coefs[i, 3], pv, sig))
   }
-  cat("---\nCód. signif.: 0 '***' 0,001 '**' 0,01 '*' 0,05 '.' 0,1 ' ' 1\n\n")
-  cat(sprintf("Erro padrão residual: %.4f com %d graus de liberdade\n",
+  cat("---\nCod. signif.: 0 '***' 0,001 '**' 0,01 '*' 0,05 '.' 0,1 ' ' 1\n\n")
+  cat(sprintf("Erro padrao residual: %.4f com %d graus de liberdade\n",
               s$sigma, s$df[2]))
   cat(sprintf("R-quadrado: %.4f   R-quadrado ajustado: %.4f\n",
               s$r.squared, s$adj.r.squared))
-  f <- s$fstatistic
+  f      <- s$fstatistic
   pf_val <- pf(f[1], f[2], f[3], lower.tail = FALSE)
-  cat(sprintf("Estatística F: %.2f com %d e %d GL   p-valor: %.2e\n",
+  cat(sprintf("Estatistica F: %.2f com %d e %d GL   p-valor: %.2e\n",
               f[1], f[2], f[3], pf_val))
 }
 
-# Imprime matriz de covariância em português
 vcov_pt <- function(modelo) {
-  v <- vcov(modelo)
+  v  <- vcov(modelo)
   rn <- rownames(v)
   rn[rn == "(Intercept)"] <- "(Intercepto)"
   rownames(v) <- colnames(v) <- rn
-  cat("Matriz de covariância estimada dos coeficientes:\n")
+  cat("Matriz de covariancia estimada dos coeficientes:\n")
   print(round(v, 6))
 }
 
-# Imprime confint em português
-confint_pt <- function(modelo, parm = NULL, level = 0.95) {
-  ci <- if (is.null(parm)) confint(modelo, level = level) else confint(modelo, parm = parm, level = level)
+confint_pt <- function(modelo, par = NULL, level = 0.95) {
+  ci <- if (is.null(par)) {
+    confint(modelo, level = level)
+  } else {
+    confint(modelo, parm = par, level = level)
+  }
   pct_inf <- paste0(round((1 - level) / 2 * 100, 1), "%")
   pct_sup <- paste0(round((1 - (1 - level) / 2) * 100, 1), "%")
   colnames(ci) <- c(paste0("Limite inf. (", pct_inf, ")"),
@@ -67,14 +71,13 @@ confint_pt <- function(modelo, parm = NULL, level = 0.95) {
   rn <- rownames(ci)
   rn[rn == "(Intercept)"] <- "(Intercepto)"
   rownames(ci) <- rn
-  cat(sprintf("Intervalo de confiança de %.0f%%:\n", level * 100))
+  cat(sprintf("Intervalo de confianca de %.0f%%:\n", level * 100))
   print(round(ci, 4))
 }
 
-# Imprime predict com intervalo em português
 predict_pt <- function(modelo, newdata, interval = "confidence", level = 0.95) {
-  p <- predict(modelo, newdata = newdata, interval = interval, level = level)
-  tipo <- if (interval == "confidence") "confiança" else "predição"
+  p    <- predict(modelo, newdata = newdata, interval = interval, level = level)
+  tipo <- if (interval == "confidence") "confianca" else "predicao"
   colnames(p) <- c("Ajuste", "Limite inferior", "Limite superior")
   cat(sprintf("Intervalo de %s de %.0f%%:\n", tipo, level * 100))
   print(round(p, 4))
@@ -93,7 +96,7 @@ Apresente abaixo um gráfico similar ao apresentado no enunciado. Comente sobre 
 ```{r}
 pairs(~ quality + helpfulness + clarity + easiness + raterInterest,
       data = Rateprof,
-      main = "Scatterplot Matrix — Rateprof")
+      main = "Scatterplot Matrix - Rateprof")
 ```
 
 As variáveis *quality*, *helpfulness* e *clarity* apresentam forte correlação positiva entre si, indicando que professores bem avaliados em clareza tendem também a ser avaliados como prestativos e de boa qualidade. A variável *easiness* mostra correlação positiva moderada com as demais, sugerindo que professores percebidos como mais fáceis tendem a receber melhores avaliações gerais. Já *raterInterest* apresenta correlação mais fraca com os demais quesitos, indicando que o interesse prévio do aluno na disciplina é relativamente independente das avaliações do professor.
@@ -117,11 +120,11 @@ A variável `average_sat_math` representa a média das notas de matemática no e
 ```{r}
 stats_tab <- MA_schools %>%
   summarise(
-    n        = n(),
-    media    = mean(average_sat_math, na.rm = TRUE),
-    dp       = sd(average_sat_math,   na.rm = TRUE),
-    minimo   = min(average_sat_math,  na.rm = TRUE),
-    maximo   = max(average_sat_math,  na.rm = TRUE)
+    n      = n(),
+    media  = mean(average_sat_math, na.rm = TRUE),
+    dp     = sd(average_sat_math,   na.rm = TRUE),
+    minimo = min(average_sat_math,  na.rm = TRUE),
+    maximo = max(average_sat_math,  na.rm = TRUE)
   ) %>%
   bind_rows(
     MA_schools %>%
@@ -133,14 +136,14 @@ stats_tab <- MA_schools %>%
         maximo = max(perc_disadvan,  na.rm = TRUE)
       )
   ) %>%
-  mutate(Variável = c("Média da nota SAT de matemática",
+  mutate(Variavel = c("Media da nota SAT de matematica",
                       "% de alunos economicamente desfavorecidos")) %>%
-  select(Variável, n, media, dp, minimo, maximo)
+  select(Variavel, n, media, dp, minimo, maximo)
 
 kable(stats_tab,
-      digits  = 1,
-      col.names = c("Variável", "n", "Média", "DP", "Mínimo", "Máximo"),
-      caption = "Estatísticas sumárias das variáveis de interesse")
+      digits    = 1,
+      col.names = c("Variavel", "n", "Media", "DP", "Minimo", "Maximo"),
+      caption   = "Estatisticas sumarias das variaveis de interesse")
 ```
 
 ```{r}
@@ -149,8 +152,8 @@ ggplot(MA_schools, aes(x = perc_disadvan, y = average_sat_math)) +
   geom_smooth(method = "lm", se = TRUE, color = "steelblue") +
   labs(
     x       = "Percentual de alunos economicamente desfavorecidos (%)",
-    y       = "Média da nota SAT de matemática",
-    title   = "Desempenho no SAT de matemática vs. desvantagem econômica",
+    y       = "Media da nota SAT de matematica",
+    title   = "Desempenho no SAT de matematica vs. desvantagem economica",
     caption = "Dados: MA_schools (moderndive). Linha: ajuste linear com IC 95%."
   ) +
   theme_minimal()
@@ -191,7 +194,7 @@ ggplot(MA_schools, aes(x = perc_disadvan, y = average_sat_math)) +
               color = "steelblue", linewidth = 1) +
   labs(
     x     = "Percentual de alunos economicamente desfavorecidos (%)",
-    y     = "Média da nota SAT de matemática",
+    y     = "Media da nota SAT de matematica",
     title = "Reta ajustada manualmente"
   ) +
   theme_minimal()
@@ -200,20 +203,18 @@ ggplot(MA_schools, aes(x = perc_disadvan, y = average_sat_math)) +
 C) Calcule, usando o R, uma estimativa para $\sigma^2$ e encontre os erros padrões de $\hat{\beta}_0$ e $\hat{\beta}_1$. Calcule $\widehat{Cov}(\hat{\beta}_0,\hat{\beta}_1)$.
 
 ```{r, echo=TRUE}
-y_hat    <- beta0_hat + beta1_hat * x
-residuos <- y - y_hat
-
+y_hat      <- beta0_hat + beta1_hat * x
+residuos   <- y - y_hat
 sigma2_hat <- sum(residuos^2) / (n - 2)
 
 se_beta1 <- sqrt(sigma2_hat / Sxx)
 se_beta0 <- sqrt(sigma2_hat * (1/n + x_bar^2 / Sxx))
-
 cov_beta <- -x_bar * sigma2_hat / Sxx
 
-cat("sigma^2 estimado     =", round(sigma2_hat, 4), "\n")
-cat("EP(beta0)            =", round(se_beta0,   4), "\n")
-cat("EP(beta1)            =", round(se_beta1,   4), "\n")
-cat("Cov(beta0, beta1)    =", round(cov_beta,   4), "\n")
+cat("sigma^2 estimado  =", round(sigma2_hat, 4), "\n")
+cat("EP(beta0)         =", round(se_beta0,   4), "\n")
+cat("EP(beta1)         =", round(se_beta1,   4), "\n")
+cat("Cov(beta0, beta1) =", round(cov_beta,   4), "\n")
 ```
 
 D) Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresente o p-valor para o teste bilateral. Descreva e interprete o resultado em termos do problema.
@@ -222,8 +223,8 @@ D) Calcule, usando o R, a estatística do teste para $H_0: \beta_1=0$. Apresente
 t_stat  <- beta1_hat / se_beta1
 p_valor <- 2 * pt(abs(t_stat), df = n - 2, lower.tail = FALSE)
 
-cat("Estatística t =", round(t_stat, 4), "\n")
-cat("p-valor       =", format(p_valor, scientific = TRUE, decimal.mark = ","), "\n")
+cat("Estatistica t =", round(t_stat, 4), "\n")
+cat("p-valor       =", format(p_valor, scientific = TRUE), "\n")
 ```
 
 A estatística do teste é $t =$ `r round(t_stat, 2)` com $p$-valor $\approx$ `r format(p_valor, scientific = TRUE, digits = 3)`. Como o $p$-valor é muito menor que 0,05, rejeitamos $H_0: \beta_1 = 0$. Há evidência estatística forte de que o percentual de alunos desfavorecidos está associado negativamente com a média no SAT de matemática.
@@ -231,12 +232,11 @@ A estatística do teste é $t =$ `r round(t_stat, 2)` com $p$-valor $\approx$ `r
 E) Calcule, usando o R, um intervalo de confiança de 95\% para $\beta_1$. Descreva e interprete o resultado em termos do problema.
 
 ```{r, echo=TRUE}
-t_crit <- qt(0.975, df = n - 2)
+t_crit       <- qt(0.975, df = n - 2)
 ic_beta1_inf <- beta1_hat - t_crit * se_beta1
 ic_beta1_sup <- beta1_hat + t_crit * se_beta1
 
 cat("IC 95% para beta1: [", round(ic_beta1_inf, 4), ",", round(ic_beta1_sup, 4), "]\n")
-
 ```
 
 Com 95% de confiança, cada ponto percentual adicional de desvantagem econômica está associado a uma redução entre `r round(abs(ic_beta1_sup), 2)` e `r round(abs(ic_beta1_inf), 2)` pontos na média do SAT de matemática. O intervalo não contém zero, confirmando a significância de $\beta_1$.
@@ -272,7 +272,7 @@ dados_ex3 <- un_member_states_2024 %>%
 
 resumo <- dados_ex3 %>%
   summarise(
-    n_life = n(),
+    n_life     = n(),
     media_life = mean(life_expectancy),
     dp_life    = sd(life_expectancy),
     min_life   = min(life_expectancy),
@@ -285,35 +285,34 @@ resumo <- dados_ex3 %>%
   )
 
 tab_resumo <- tibble(
-  Variável = c("Expectativa de vida (anos)", "Taxa de fertilidade (filhos/mulher)"),
-  n        = c(resumo$n_life, resumo$n_fert),
-  Média    = c(resumo$media_life, resumo$media_fert),
-  DP       = c(resumo$dp_life, resumo$dp_fert),
-  Mínimo   = c(resumo$min_life, resumo$min_fert),
-  Máximo   = c(resumo$max_life, resumo$max_fert)
+  Variavel = c("Expectativa de vida (anos)",
+               "Taxa de fertilidade (filhos/mulher)"),
+  n        = c(resumo$n_life,     resumo$n_fert),
+  Media    = c(resumo$media_life, resumo$media_fert),
+  DP       = c(resumo$dp_life,    resumo$dp_fert),
+  Minimo   = c(resumo$min_life,   resumo$min_fert),
+  Maximo   = c(resumo$max_life,   resumo$max_fert)
 )
 
 kable(tab_resumo, digits = 2,
-      caption = "Estatísticas sumárias — Exercício 3")
+      col.names = c("Variavel", "n", "Media", "DP", "Minimo", "Maximo"),
+      caption   = "Estatisticas sumarias - Exercicio 3")
 ```
 
 As estatísticas sumárias mostram ampla variação em ambas as variáveis, sugerindo que os países são heterogêneos. Antes de modelar, verificamos a distribuição individual de cada variável e a relação entre elas.
 
 ```{r}
-p1 <- ggplot(dados_ex3, aes(x = life_expectancy)) +
+ggplot(dados_ex3, aes(x = life_expectancy)) +
   geom_histogram(bins = 20, fill = "steelblue", color = "white") +
-  labs(x = "Expectativa de vida (anos)", y = "Frequência",
-       title = "Distribuição da expectativa de vida") +
+  labs(x = "Expectativa de vida (anos)", y = "Frequencia",
+       title = "Distribuicao da expectativa de vida") +
   theme_minimal()
 
-p2 <- ggplot(dados_ex3, aes(x = fertility_rate)) +
+ggplot(dados_ex3, aes(x = fertility_rate)) +
   geom_histogram(bins = 20, fill = "coral", color = "white") +
-  labs(x = "Taxa de fertilidade", y = "Frequência",
-       title = "Distribuição da taxa de fertilidade") +
+  labs(x = "Taxa de fertilidade", y = "Frequencia",
+       title = "Distribuicao da taxa de fertilidade") +
   theme_minimal()
-
-p1
-p2
 ```
 
 A taxa de fertilidade apresenta assimetria à direita, enquanto a expectativa de vida tem distribuição mais próxima da simétrica. O diagrama de dispersão a seguir é fundamental para decidir a forma do modelo.
@@ -338,10 +337,10 @@ resumo_lm_pt(modelo3)
 ```
 
 ```{r}
-s3 <- summary(modelo3)
-beta0_3 <- coef(modelo3)[1]
-beta1_3 <- coef(modelo3)[2]
-r2_3    <- s3$r.squared
+s3       <- summary(modelo3)
+beta0_3  <- coef(modelo3)[1]
+beta1_3  <- coef(modelo3)[2]
+r2_3     <- s3$r.squared
 sigma2_3 <- s3$sigma^2
 ```
 
@@ -350,7 +349,7 @@ O modelo estimado é $\widehat{\text{fertilidade}} = `r round(beta0_3, 3)` + `r 
 C) Apresente um intervalo de confiança para $\beta_1$ de 95\%.
 
 ```{r, echo=TRUE}
-confint_pt(modelo3, parm = "life_expectancy", level = 0.95)
+confint_pt(modelo3, par = "life_expectancy", level = 0.95)
 ```
 
 ```{r}
@@ -367,7 +366,8 @@ predict_pt(modelo3, newdata = novo, interval = "confidence", level = 0.95)
 ```
 
 ```{r}
-ic_media_70 <- predict(modelo3, newdata = novo, interval = "confidence", level = 0.95)
+ic_media_70 <- predict(modelo3, newdata = novo,
+                       interval = "confidence", level = 0.95)
 ```
 
 Para países com expectativa de vida de 70 anos, estima-se que a taxa de fertilidade média seja `r round(ic_media_70[1], 3)` filhos por mulher, com intervalo de confiança de 95\% de [`r round(ic_media_70[2], 3)`, `r round(ic_media_70[3], 3)`]. Esse intervalo reflete a incerteza sobre o valor médio populacional, sendo mais estreito do que o intervalo de predição.
@@ -379,7 +379,8 @@ predict_pt(modelo3, newdata = novo, interval = "prediction", level = 0.95)
 ```
 
 ```{r}
-ip_70 <- predict(modelo3, newdata = novo, interval = "prediction", level = 0.95)
+ip_70 <- predict(modelo3, newdata = novo,
+                 interval = "prediction", level = 0.95)
 ```
 
 Para um país específico com expectativa de vida de 70 anos, o intervalo de predição de 95\% é [`r round(ip_70[2], 3)`, `r round(ip_70[3], 3)`] filhos por mulher. Esse intervalo é mais amplo do que o de confiança pois incorpora, além da incerteza sobre a média, a variabilidade natural entre países individuais.
@@ -392,7 +393,7 @@ A) Divisão treino/validação e ajuste do modelo.
 
 ```{r, echo=TRUE}
 set.seed(42)
-n_total <- nrow(MA_schools)
+n_total    <- nrow(MA_schools)
 idx_treino <- sample(seq_len(n_total), size = floor(2/3 * n_total))
 
 treino    <- MA_schools[ idx_treino, ]
@@ -405,17 +406,15 @@ resumo_lm_pt(modelo_treino)
 B) Predições no subconjunto validação e comparação de RMSE.
 
 ```{r, echo=TRUE}
-# Predições e RMSE na validação
-pred_val  <- predict(modelo_treino, newdata = validacao)
-res_val   <- validacao$average_sat_math - pred_val
-RMSE_val  <- sqrt(mean(res_val^2))
+pred_val    <- predict(modelo_treino, newdata = validacao)
+res_val     <- validacao$average_sat_math - pred_val
+RMSE_val    <- sqrt(mean(res_val^2))
 
-# RMSE no treino
 res_treino  <- residuals(modelo_treino)
 RMSE_treino <- sqrt(mean(res_treino^2))
 
 cat("RMSE treino    =", round(RMSE_treino, 3), "\n")
-cat("RMSE validação =", round(RMSE_val,    3), "\n")
+cat("RMSE validacao =", round(RMSE_val,    3), "\n")
 ```
 
 ```{r}
